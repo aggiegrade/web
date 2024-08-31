@@ -1,0 +1,73 @@
+.header {
+  height: rem(70px);
+  margin-bottom: rem(100px);
+  background-color: #500000;
+  border-bottom: rem(1px) solid light-dark(var(--mantine-color-gray-3), var(--mantine-color-dark-4));
+  padding-left: var(--mantine-spacing-md);
+  padding-right: var(--mantine-spacing-md);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+}
+
+.inner {
+  height: rem(70px);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-wrap: nowrap;
+  flex-direction: row;
+  width: 100%;
+  max-width: 1200px;
+  position: relative;
+}
+
+.logo {
+  font-size: rem(24px); /* Adjust the font size as needed */
+  font-weight: bold;
+  margin-right: rem(20px); /* Spacing between logo and search bar */
+  color: light-dark(var(--mantine-color-white), var(--mantine-color-white));
+}
+
+.links {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-left: rem(10px);
+  flex-wrap: nowrap;
+}
+
+.link {
+  display: block;
+  line-height: 1;
+  padding: rem(8px) rem(12px);
+  border-radius: var(--mantine-radius-sm);
+  text-decoration: none;
+  color: light-dark(var(--mantine-color-white), var(--mantine-color-dark-0));
+  font-size: rem(16px); 
+  font-weight: 500;
+
+  @mixin hover {
+    background-color: light-dark(var(--mantine-color-gray-0), var(--mantine-color-dark-6));
+  }
+
+  @media (max-width: $mantine-breakpoint-sm) {
+    height: rem(42px);
+    width: 100%;
+  }
+}
+
+.search {
+  flex-grow: 1;
+  max-width: 600px;
+  min-width: 200px;
+  justify-content: center;
+  position: relative;
+}
+
+.colorSchemeToggle {
+  display: flex;
+  align-items: center;
+  flex-wrap: nowrap;
+}
