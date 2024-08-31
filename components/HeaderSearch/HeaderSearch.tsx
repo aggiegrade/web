@@ -29,8 +29,28 @@ export function HeaderSearch() {
     </a>
   ));
 
+  const drawerItems = links.map((link) => (
+    <a
+      key={link.label}
+      href={link.link}
+      className={`${classes.drawerLink}`}
+      onClick={(event) => event.preventDefault()}
+    >
+      {link.label}
+    </a>
+  ));
+
   return (
     <header className={classes.header}>
+      {/* Burger icon for mobile */}
+      <Burger
+        opened={opened}
+        onClick={toggle}
+        className={classes.burger}
+        size="sm"
+        aria-label="Toggle menu"
+        hiddenFrom="sm"
+      />
       <div className={classes.inner}>
         <div className={classes.logo}>AggieGrade</div>
 
@@ -60,7 +80,8 @@ export function HeaderSearch() {
       >
         <ScrollArea h={`calc(100vh - ${rem(80)})`} mx="-md">
           <Stack>
-            {items}
+            {drawerItems}
+            <ActionToggle />
           </Stack>
         </ScrollArea>
       </Drawer>

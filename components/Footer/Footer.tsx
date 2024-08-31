@@ -1,17 +1,43 @@
 "use client";
+import { useEffect, useState } from 'react';
 import { Anchor, Group, ActionIcon, rem, Text } from '@mantine/core';
-import { IconBrandTwitter, IconBrandYoutube, IconBrandInstagram } from '@tabler/icons-react';
+import { IconBrandTwitter, IconBrandYoutube, IconBrandInstagram, IconBrandGithub } from '@tabler/icons-react';
 import classes from '../Footer/Footer.module.css';
 
 const links = [
-  { link: '/', label: 'Contact' },
-  { link: '/', label: 'Privacy' },
-  { link: '/', label: 'Blog' },
-  { link: '/', label: 'Store' },
-  { link: '/', label: 'Careers' },
+  { link: '/', label: '' },
+  // { link: '/', label: 'Privacy' },
+  // { link: '/', label: 'Blog' },
+  // { link: '/', label: 'Store' },
+  // { link: '/', label: 'Careers' },
 ];
 
 export function Footer() {
+  const [latestCommit, setLatestCommit] = useState<string | null>(null);
+  const [commitUrl, setCommitUrl] = useState<string | null>(null);
+
+  useEffect(() => {
+    // Fetch the latest commit from GitHub API
+    const fetchLatestCommit = async () => {
+      try {
+        const response = await fetch('https://api.github.com/repos/aggiegrade/web/commits/main', {
+          headers: {
+            Authorization: `token ${process.env.NEXT_PUBLIC_GITHUB_TOKEN}`,
+          },
+        });
+        const data = await response.json();
+        const commitSha = data.sha;
+        const commitUrl = data.html_url;
+        setLatestCommit(commitSha);
+        setCommitUrl(commitUrl);
+      } catch (error) {
+        console.error('Failed to fetch latest commit:', error);
+      }
+    };
+
+    fetchLatestCommit();
+  }, []);
+
   const items = links.map((link) => (
     <Anchor
       className={classes.linkItem}
@@ -32,23 +58,25 @@ export function Footer() {
         <Text size="md" fw={700}>
             aggiegrade/web
         </Text>
-        {/* <MantineLogo size={28} /> */}
 
         <Group className={classes.links}>
-            Version 0.0.1, Commit: 
+            Version 0.0.1, Commit:
+            {latestCommit ? (
+              <Anchor href={commitUrl || undefined} className={classes.commitLink}>
+                {latestCommit.slice(0, 7)} {/* Show only the first 7 characters of the commit SHA */}
+              </Anchor>
+            ) : (
+              'Loading...'
+            )}
             {items}
-            </Group>
+        </Group>
 
         <Group gap="xs" justify="flex-end" wrap="nowrap">
+          <a href="https://github.com/aggiegrade" target="_blank" rel="noopener noreferrer">
           <ActionIcon size="lg" variant="default" radius="xl">
-            <IconBrandTwitter style={{ width: rem(18), height: rem(18) }} stroke={1.5} />
+            <IconBrandGithub style={{ width: rem(18), height: rem(18) }} stroke={1.5} />
           </ActionIcon>
-          <ActionIcon size="lg" variant="default" radius="xl">
-            <IconBrandYoutube style={{ width: rem(18), height: rem(18) }} stroke={1.5} />
-          </ActionIcon>
-          <ActionIcon size="lg" variant="default" radius="xl">
-            <IconBrandInstagram style={{ width: rem(18), height: rem(18) }} stroke={1.5} />
-          </ActionIcon>
+          </a>
         </Group>
       </div>
     </div>

@@ -45,3 +45,7 @@
 .cardDesc {
   color: light-dark(var(--mantine-color-black), var(--mantine-color-gray-3)) !important; /* Adjust this as needed */
 }
+
+.drawerLink .link {
+  color: light-dark(var(--mantine-color-black), var(--mantine-color-black)) !important;
+}

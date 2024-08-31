@@ -27,3 +27,8 @@
   .linkItem {
     color: light-dark(var(--mantine-color-gray-2), var(--mantine-color-gray-2)) !important;
   }
+
+  .commitLink {
+    margin-left: -10px; /* Adjust this value to move the link closer to the "Commit:" text */
+    color: var(--mantine-color-blue-5);
+}
