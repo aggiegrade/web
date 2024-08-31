@@ -32,7 +32,7 @@ export function HeaderSearch() {
   return (
     <header className={classes.header}>
       <div className={classes.inner}>
-        <div className={classes.logo}>AggyGrades</div>
+        <div className={classes.logo}>AggieGrade</div>
 
         <Autocomplete
           className={classes.search}

@@ -4,7 +4,7 @@ import { MantineProvider, ColorSchemeScript } from '@mantine/core';
 import { theme } from '../theme';
 
 export const metadata = {
-  title: 'Aggygrades',
+  title: 'AggieGrade',
   description: 'Grade distribution data for Texas A&M University',
 };
 

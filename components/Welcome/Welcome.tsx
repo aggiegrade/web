@@ -49,7 +49,7 @@ export function Welcome() {
       <Title className={classes.title} ta="center">
         Welcome to{' '}
         <Text inherit variant="gradient" component="span" gradient={{ from: 'pink', to: 'yellow' }}>
-          AggyGrades
+          AggieGrade
         </Text>
       </Title>
       <Text c="dimmed" ta="center" size="lg" mx="auto" mt="xl">
@@ -58,7 +58,6 @@ export function Welcome() {
       </Text>
 
       <Container size="lg" py="xl">
-
 
         <SimpleGrid cols={{ base: 1, md: 3 }} spacing="xl" mt={50}>
           {features}
