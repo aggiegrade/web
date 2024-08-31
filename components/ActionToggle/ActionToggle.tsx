@@ -14,6 +14,7 @@ export function ActionToggle() {
         variant="default"
         size="xl"
         aria-label="Toggle color scheme"
+        radius="lg"
       >
         <IconSun className={cx(classes.icon, classes.light)} stroke={1.5} />
         <IconMoon className={cx(classes.icon, classes.dark)} stroke={1.5} />

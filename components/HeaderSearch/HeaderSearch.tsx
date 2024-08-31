@@ -4,14 +4,14 @@ import { useDisclosure } from '@mantine/hooks';
 import { IconSearch } from '@tabler/icons-react';
 import { ActionToggle } from '../ActionToggle/ActionToggle';
 import classes from './HeaderSearch.module.css';
+import Link from 'next/link';
 
 const links = [
-  { link: '/', label: 'Colleges' },
-  { link: '/', label: 'Departments' },
-  { link: '/', label: 'Subjects' },
-  { link: '/', label: 'Courses' },
+  { link: '/', label: 'Home' },
   { link: '/', label: 'Instructors' },
+  { link: '/', label: 'Subjects' },
   { link: '/', label: 'Random' },
+  { link: '/', label: 'FAQ' },
   { link: '/', label: 'About' },
 ];
 
@@ -32,7 +32,7 @@ export function HeaderSearch() {
   return (
     <header className={classes.header}>
       <div className={classes.inner}>
-        <div className={classes.logo}>AggyGrades</div> {/* Added logo div */}
+        <div className={classes.logo}>AggyGrades</div>
 
         <Autocomplete
           className={classes.search}
