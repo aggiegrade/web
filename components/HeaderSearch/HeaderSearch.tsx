@@ -1,5 +1,5 @@
-"use client";
-import { useEffect, useState } from 'react';
+'use client';
+import React, { useEffect, useState } from 'react';
 import { Autocomplete, Group, Burger, rem, Drawer, ScrollArea, Stack } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
 import { IconSearch } from '@tabler/icons-react';
@@ -17,7 +17,7 @@ interface SubjectAndCourse {
 const links = [
   { link: '/', label: 'Home' },
   { link: '/', label: 'Instructors' },
-  { link: '/', label: 'Subjects' },
+  { link: '/subject', label: 'Subjects' },
   { link: '/', label: 'Random' },
   { link: '/', label: 'FAQ' },
   { link: '/', label: 'About' },
@@ -50,7 +50,9 @@ export function HeaderSearch() {
           throw new Error(`HTTP error! status: ${response.status}`);
         }
         const instructors = await response.json();
-        const names = instructors.map((instructor: { instructorname: string }) => instructor.instructorname);
+        const names = instructors.map(
+          (instructor: { instructorname: string }) => instructor.instructorname
+        );
         setInstructorNames(names);
         // console.log('Instructors API Result:', instructors); // Debug statement
       } catch (error) {
@@ -66,7 +68,9 @@ export function HeaderSearch() {
           throw new Error(`HTTP error! status: ${response.status}`);
         }
         const subjectsAndCourses: SubjectAndCourse[] = await response.json(); // Explicitly type the response
-        const formattedSubjectAndCourses = subjectsAndCourses.map((item) => `${item.SubjectCode} ${item.Course}`);
+        const formattedSubjectAndCourses = subjectsAndCourses.map(
+          (item) => `${item.SubjectCode} ${item.Course}`
+        );
         const uniqueSubjectAndCourses = Array.from(new Set(formattedSubjectAndCourses)); // Remove duplicates because mantine does not support duplicate entries in autocomplete
         setSubjectAndCourses(uniqueSubjectAndCourses);
         // console.log('Subject and Course API Result:', subjectsAndCourses); // Debug statement
@@ -122,6 +126,10 @@ export function HeaderSearch() {
           ]}
           limit={6}
           visibleFrom="xs"
+          onOptionSubmit={(item) => {
+            console.log('Selected item:', item);
+            // Store the selected item string
+          }}
         />
 
         <Group className={classes.links} visibleFrom="sm">
