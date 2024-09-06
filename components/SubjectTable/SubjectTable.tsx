@@ -1,8 +1,12 @@
 'use client';
-import { useRouter } from 'next/router';
 import { Table, Container, Loader, Text } from '@mantine/core';
 import { useEffect, useState } from 'react';
+import { useSearchParams } from 'next/navigation'; // Use this to capture the query parameters
 import classes from './SubjectTable.module.css';
+
+interface SubjectTableProps {
+  selectedQuery: string | null; // The selected query might be null initially
+}
 
 // Define the data structure for each row
 interface CourseData {
@@ -21,50 +25,62 @@ interface CourseData {
   s: number;
 }
 
-export function SubjectTable() {
-  const router = useRouter();
-  const { query } = router.query; // Get the value passed from the previous page
+export function SubjectTable({ selectedQuery }: SubjectTableProps) {
+  const searchParams = useSearchParams(); // Use useSearchParams to get the query params
+  const query = searchParams.get('query'); // Get the query param from the URL (e.g., "ACCT 327")
   const [courseData, setCourseData] = useState<CourseData[]>([]);
   const [loading, setLoading] = useState(true);
 
-  // Fetch course data when the component first mounts
   useEffect(() => {
-    
-    const fetchCourseData = async () => {
-      try {
-        const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/subject-and-courses`);
-        if (!response.ok) {
-          throw new Error(`HTTP error! status: ${response.status}`);
+    if (query) {
+      // Run the API request only if the query parameter exists
+      const fetchCourseData = async () => {
+        try {
+          <div>
+            <h1>Subject Data</h1>
+            {selectedQuery ? (
+              <p>Displaying results for: {selectedQuery}</p>
+            ) : (
+              <p>No subject selected</p>
+            )}
+          </div>;
+          // Make a dynamic API call, passing the query parameter as a filter
+          const response = await fetch(
+            `${process.env.NEXT_PUBLIC_API_BASE_URL}/detailed-sections?search=${encodeURIComponent(query)}`
+          );
+          if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+          }
+          const data = await response.json();
+
+          // Process the data to combine SubjectCode and Course into Term
+          const processedData: CourseData[] = data.map((item: any) => ({
+            term: `${item.Subject} ${item.Course} (${item.Semester} ${item.Year})`, // Example combination
+            section: item.Section || 'N/A',
+            instructor: item.InstructorName || 'Unknown',
+            enrolled: item.TotalStudents || 0,
+            gpa: item.Average_GPA || 0,
+            a: item.A || 0,
+            b: item.B || 0,
+            c: item.C || 0,
+            d: item.D || 0,
+            f: item.F || 0,
+            dw: item.DroppedWithdrawn || 0,
+            u: item.Unsatisfactory || 0,
+            s: item.Satisfactory || 0,
+          }));
+
+          setCourseData(processedData);
+        } catch (error) {
+          console.error('Failed to fetch course data:', error);
+        } finally {
+          setLoading(false);
         }
-        const data = await response.json();
+      };
 
-        // Process the data to combine SubjectCode and Course into Term
-        const processedData: CourseData[] = data.map((item: any) => ({
-          term: `${item.SubjectCode.toUpperCase()} ${item.Course}`,
-          section: item.section,
-          instructor: item.instructor,
-          enrolled: item.enrolled,
-          gpa: item.gpa,
-          a: item.a,
-          b: item.b,
-          c: item.c,
-          d: item.d,
-          f: item.f,
-          dw: item.dw,
-          u: item.u,
-          s: item.s,
-        }));
-
-        setCourseData(processedData);
-      } catch (error) {
-        console.error('Failed to fetch course data:', error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchCourseData();
-  }, []);
+      fetchCourseData();
+    }
+  }, [query]);
 
   if (loading) {
     return (
@@ -77,11 +93,10 @@ export function SubjectTable() {
 
   return (
     <Container size="md" py="xl" className={classes.container}>
-      {query && (
-        <Text className={classes.selectedQuery} size="lg" mb="lg">
-          Selected Search: {query}
-        </Text>
-      )}
+      <Text size="lg" mb="lg">
+        Results for: {query}
+      </Text>{' '}
+      {/* Display search term */}
       <Table highlightOnHover>
         <thead>
           <tr>
@@ -107,7 +122,7 @@ export function SubjectTable() {
               <td>{item.section}</td>
               <td>{item.instructor}</td>
               <td>{item.enrolled}</td>
-              <td>{item.gpa ? item.gpa.toFixed(2) : 'N/A'}</td> {/* Updated Line */}
+              <td>{typeof item.gpa === 'number' ? item.gpa.toFixed(2) : 'N/A'}</td>
               <td>{item.a}</td>
               <td>{item.b}</td>
               <td>{item.c}</td>

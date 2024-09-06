@@ -1,4 +1,6 @@
 'use client';
+
+import { useRouter } from 'next/navigation';
 import React, { useEffect, useState } from 'react';
 import { Autocomplete, Group, Burger, rem, Drawer, ScrollArea, Stack } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
@@ -7,42 +9,39 @@ import { ActionToggle } from '../ActionToggle/ActionToggle';
 import classes from './HeaderSearch.module.css';
 import Link from 'next/link';
 
-// Define the subjct and course data structure
 interface SubjectAndCourse {
   SubjectCode: string;
   Course: string;
 }
 
-// Navigation links for header
 const links = [
   { link: '/', label: 'Home' },
-  { link: '/', label: 'Instructors' },
+  { link: '/instructors', label: 'Instructors' },
   { link: '/subject', label: 'Subjects' },
-  { link: '/', label: 'Random' },
-  { link: '/', label: 'FAQ' },
-  { link: '/', label: 'About' },
+  { link: '/random', label: 'Random' },
+  { link: '/faq', label: 'FAQ' },
+  { link: '/about', label: 'About' },
 ];
 
 export function HeaderSearch() {
-  const [opened, { toggle, close }] = useDisclosure(false); // Managing drawer (mobile menu) statement
-  const [instructorNames, setInstructorNames] = useState<string[]>([]); // Statement to store instructor names
-  const [subjectAndCourses, setSubjectAndCourses] = useState<string[]>([]); // Statement to store subject and course combinations
+  const router = useRouter();
+  const [searchTerm, setSearchTerm] = useState('');
+  const [opened, { toggle, close }] = useDisclosure(false);
+  const [instructorNames, setInstructorNames] = useState<string[]>([]);
+  const [subjectAndCourses, setSubjectAndCourses] = useState<string[]>([]);
 
-  // Mapping nav links to JSX elements
+  const handleSearch = (item: string) => {
+    setSearchTerm(item);
+    router.push(`/subject?query=${encodeURIComponent(item)}`);
+  };
+
   const items = links.map((link) => (
-    <a
-      key={link.label}
-      href={link.link}
-      className={classes.link}
-      onClick={(event) => event.preventDefault()}
-    >
+    <Link href={link.link} key={link.label} className={classes.link}>
       {link.label}
-    </a>
+    </Link>
   ));
 
-  // Fetch data when component first mounts
   useEffect(() => {
-    // Fetch instructors from the API
     const fetchInstructors = async () => {
       try {
         const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/instructors`);
@@ -54,51 +53,40 @@ export function HeaderSearch() {
           (instructor: { instructorname: string }) => instructor.instructorname
         );
         setInstructorNames(names);
-        // console.log('Instructors API Result:', instructors); // Debug statement
       } catch (error) {
         console.error('Failed to fetch instructors:', error);
       }
     };
 
-    // Fetch subject and course data from the API
     const fetchSubjectAndCourses = async () => {
       try {
         const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/subject-and-course`);
         if (!response.ok) {
           throw new Error(`HTTP error! status: ${response.status}`);
         }
-        const subjectsAndCourses: SubjectAndCourse[] = await response.json(); // Explicitly type the response
+        const subjectsAndCourses: SubjectAndCourse[] = await response.json();
         const formattedSubjectAndCourses = subjectsAndCourses.map(
           (item) => `${item.SubjectCode} ${item.Course}`
         );
-        const uniqueSubjectAndCourses = Array.from(new Set(formattedSubjectAndCourses)); // Remove duplicates because mantine does not support duplicate entries in autocomplete
+        const uniqueSubjectAndCourses = Array.from(new Set(formattedSubjectAndCourses));
         setSubjectAndCourses(uniqueSubjectAndCourses);
-        // console.log('Subject and Course API Result:', subjectsAndCourses); // Debug statement
       } catch (error) {
         console.error('Failed to fetch subject and courses:', error);
       }
     };
 
-    // Initiate fetch calls
     fetchInstructors();
     fetchSubjectAndCourses();
   }, []);
 
-  // Mapping drawer items to JSX elements for mobile view
   const drawerItems = links.map((link) => (
-    <a
-      key={link.label}
-      href={link.link}
-      className={classes.drawerLink}
-      onClick={(event) => event.preventDefault()}
-    >
+    <Link href={link.link} key={link.label} className={classes.drawerLink}>
       {link.label}
-    </a>
+    </Link>
   ));
 
   return (
     <header className={classes.header}>
-      {/* Burger icon for mobile */}
       <Burger
         opened={opened}
         onClick={toggle}
@@ -127,8 +115,7 @@ export function HeaderSearch() {
           limit={6}
           visibleFrom="xs"
           onOptionSubmit={(item) => {
-            console.log('Selected item:', item);
-            // Store the selected item string
+            handleSearch(item);
           }}
         />
 
@@ -138,7 +125,6 @@ export function HeaderSearch() {
         </Group>
       </div>
 
-      {/* Mobile Menu Drawer */}
       <Drawer
         opened={opened}
         onClose={close}
