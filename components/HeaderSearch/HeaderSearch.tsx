@@ -16,8 +16,8 @@ interface SubjectAndCourse {
 
 const links = [
   { link: '/', label: 'Home' },
-  { link: '/instructors', label: 'Instructors' },
-  { link: '/subject', label: 'Subjects' },
+  // { link: '/instructors', label: 'Instructors' },
+  // { link: '/subject', label: 'Subjects' },
   { link: '/random', label: 'Random' },
   { link: '/faq', label: 'FAQ' },
   { link: '/about', label: 'About' },

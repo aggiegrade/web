@@ -1,73 +1,69 @@
 'use client';
-import { Table, Container, Loader, Text } from '@mantine/core';
+import { Table, Loader, Text, Container } from '@mantine/core';
 import { useEffect, useState } from 'react';
-import { useSearchParams } from 'next/navigation'; // Use this to capture the query parameters
-import classes from './SubjectTable.module.css';
+import { useSearchParams } from 'next/navigation';
 
 interface SubjectTableProps {
-  selectedQuery: string | null; // The selected query might be null initially
+  selectedQuery: string | null;
 }
 
 // Define the data structure for each row
 interface CourseData {
-  term: string;
+  semester: string;
+  year: string;
   section: string;
-  instructor: string;
-  enrolled: number;
-  gpa: number;
+  instructorName: string;
+  totalStudents: number;
   a: number;
   b: number;
   c: number;
   d: number;
   f: number;
-  dw: number;
-  u: number;
-  s: number;
+  droppedWithdrawn: number;
+  incomplete: number;
+  satisfactory: number;
+  unsatisfactory: number;
+  noGrade: number;
+  averageGPA: number;
 }
 
 export function SubjectTable({ selectedQuery }: SubjectTableProps) {
-  const searchParams = useSearchParams(); // Use useSearchParams to get the query params
-  const query = searchParams.get('query'); // Get the query param from the URL (e.g., "ACCT 327")
+  const searchParams = useSearchParams();
+  const query = searchParams.get('query');
   const [courseData, setCourseData] = useState<CourseData[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     if (query) {
-      // Run the API request only if the query parameter exists
       const fetchCourseData = async () => {
         try {
-          <div>
-            <h1>Subject Data</h1>
-            {selectedQuery ? (
-              <p>Displaying results for: {selectedQuery}</p>
-            ) : (
-              <p>No subject selected</p>
-            )}
-          </div>;
-          // Make a dynamic API call, passing the query parameter as a filter
           const response = await fetch(
-            `${process.env.NEXT_PUBLIC_API_BASE_URL}/detailed-sections?search=${encodeURIComponent(query)}`
+            `${process.env.NEXT_PUBLIC_API_BASE_URL}/detailed-sections?search=${encodeURIComponent(
+              query
+            )}`
           );
           if (!response.ok) {
             throw new Error(`HTTP error! status: ${response.status}`);
           }
           const data = await response.json();
 
-          // Process the data to combine SubjectCode and Course into Term
           const processedData: CourseData[] = data.map((item: any) => ({
-            term: `${item.Subject} ${item.Course} (${item.Semester} ${item.Year})`, // Example combination
+            semester: item.Semester,
+            year: item.Year,
             section: item.Section || 'N/A',
-            instructor: item.InstructorName || 'Unknown',
-            enrolled: item.TotalStudents || 0,
-            gpa: item.Average_GPA || 0,
+            instructorName: item.InstructorName || 'Unknown',
+            totalStudents: item.TotalStudents || 0,
             a: item.A || 0,
             b: item.B || 0,
             c: item.C || 0,
             d: item.D || 0,
             f: item.F || 0,
-            dw: item.DroppedWithdrawn || 0,
-            u: item.Unsatisfactory || 0,
-            s: item.Satisfactory || 0,
+            droppedWithdrawn: item.DroppedWithdrawn || 0,
+            incomplete: item.Incomplete || 0,
+            satisfactory: item.Satisfactory || 0,
+            unsatisfactory: item.Unsatisfactory || 0,
+            noGrade: item.NoGrade || 0,
+            averageGPA: item.Average_GPA || 0,
           }));
 
           setCourseData(processedData);
@@ -84,56 +80,70 @@ export function SubjectTable({ selectedQuery }: SubjectTableProps) {
 
   if (loading) {
     return (
-      <Container size="md" className={classes.loaderContainer}>
+      <div>
         <Loader size="lg" />
-        <Text className={classes.loadingText}>Loading course data...</Text>
-      </Container>
+        <Text>Loading course data...</Text>
+      </div>
     );
   }
 
+  // Map course data to rows
+  const rows = courseData.map((item, index) => (
+    <Table.Tr key={index}>
+      <Table.Td>{item.semester}</Table.Td>
+      <Table.Td>{item.year}</Table.Td>
+      <Table.Td>{item.section}</Table.Td>
+      <Table.Td>{item.instructorName}</Table.Td>
+      <Table.Td>{item.totalStudents}</Table.Td>
+      <Table.Td>{item.a}</Table.Td>
+      <Table.Td>{item.b}</Table.Td>
+      <Table.Td>{item.c}</Table.Td>
+      <Table.Td>{item.d}</Table.Td>
+      <Table.Td>{item.f}</Table.Td>
+      <Table.Td>{item.droppedWithdrawn}</Table.Td>
+      <Table.Td>{item.incomplete}</Table.Td>
+      <Table.Td>{item.satisfactory}</Table.Td>
+      <Table.Td>{item.unsatisfactory}</Table.Td>
+      <Table.Td>{item.noGrade}</Table.Td>
+      <Table.Td>{typeof item.averageGPA === 'number' ? item.averageGPA.toFixed(2) : 'N/A'}</Table.Td>
+    </Table.Tr>
+  ));
+
   return (
-    <Container size="md" py="xl" className={classes.container}>
-      <Text size="lg" mb="lg">
-        Results for: {query}
-      </Text>{' '}
-      {/* Display search term */}
-      <Table highlightOnHover>
-        <thead>
-          <tr>
-            <th>Term</th>
-            <th>Section</th>
-            <th>Instructor</th>
-            <th># Enrolled</th>
-            <th>GPA</th>
-            <th>A</th>
-            <th>B</th>
-            <th>C</th>
-            <th>D</th>
-            <th>F</th>
-            <th>D/W</th>
-            <th>U</th>
-            <th>S</th>
-          </tr>
-        </thead>
-        <tbody>
-          {courseData.map((item, index) => (
-            <tr key={index}>
-              <td>{item.term}</td>
-              <td>{item.section}</td>
-              <td>{item.instructor}</td>
-              <td>{item.enrolled}</td>
-              <td>{typeof item.gpa === 'number' ? item.gpa.toFixed(2) : 'N/A'}</td>
-              <td>{item.a}</td>
-              <td>{item.b}</td>
-              <td>{item.c}</td>
-              <td>{item.d}</td>
-              <td>{item.f}</td>
-              <td>{item.dw}</td>
-              <td>{item.u}</td>
-              <td>{item.s}</td>
-            </tr>
-          ))}
-        </tbody>
+    <Container size="lg" style={{ padding: '20px' }}>
+      <Table
+        striped
+        highlightOnHover
+        withTableBorder
+        verticalSpacing="md"
+        withColumnBorders
+        stickyHeader
+        stickyHeaderOffset={60}
+        style={{ maxWidth: '100%', overflowX: 'auto' }}
+        className="custom-table"
+      >
+        <Table.Thead>
+          <Table.Tr>
+            <Table.Th>Semester</Table.Th>
+            <Table.Th>Year</Table.Th>
+            <Table.Th>Section</Table.Th>
+            <Table.Th>Instructor</Table.Th>
+            <Table.Th># Enrolled</Table.Th>
+            <Table.Th>A</Table.Th>
+            <Table.Th>B</Table.Th>
+            <Table.Th>C</Table.Th>
+            <Table.Th>D</Table.Th>
+            <Table.Th>F</Table.Th>
+            <Table.Th>Q</Table.Th>
+            <Table.Th>I</Table.Th>
+            <Table.Th>S</Table.Th>
+            <Table.Th>U</Table.Th>
+            <Table.Th>X</Table.Th>
+            <Table.Th>Average GPA</Table.Th>
+          </Table.Tr>
+        </Table.Thead>
+        <Table.Tbody>{rows}</Table.Tbody>
+        {/* <Table.Caption>Course performance data</Table.Caption> */}
       </Table>
     </Container>
   );
