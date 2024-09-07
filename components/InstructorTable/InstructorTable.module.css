@@ -1,0 +1,51 @@
+/* SubjectTable.module.css */
+
+.title {
+    margin-bottom: 1.5rem;
+    font-size: 2rem;
+    color: #1a1b1e;
+  }
+
+.container {
+  margin-top: 2rem;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.card {
+  width: 100%;
+  max-width: 600px;
+  background-color: #f8f9fa;
+  border: 1px solid #dee2e6;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.cardTitle {
+  color: #495057;
+}
+
+.cardDesc {
+  color: #6c757d;
+}
+
+.loaderContainer {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  min-height: 200px;
+}
+
+.loadingText {
+  margin-top: 1rem;
+  color: #6c757d;
+}
+
+.custom-table tr {
+  background-color: inherit; /* Ensures proper stripe effect */
+}
+
+.custom-table tr:hover {
+  background-color: rgba(0, 0, 0, 0.05); /* Ensures hover effect */
+}

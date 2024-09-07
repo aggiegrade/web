@@ -1,5 +1,5 @@
 'use client';
-import { Table, Loader, Text, Container } from '@mantine/core';
+import { Table, Loader, Text, Container, Title, Tooltip, Button, Badge } from '@mantine/core';
 import { useEffect, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
 
@@ -110,7 +110,34 @@ export function SubjectTable({ selectedQuery }: SubjectTableProps) {
   ));
 
   return (
+    // Displaying Section Title
     <Container size="lg" style={{ padding: '20px' }}>
+      <div>
+        <Title order={1} style={{ marginBottom: '5px', marginTop: '-80px' }}>
+          {query}
+        </Title>
+
+        {/* Display averages below title (WIP) */}
+        {/* <Tooltip
+          label="Average GPA"
+          position="bottom"
+          offset={5}
+          transitionProps={{ transition: 'fade-down', duration: 300 }}
+        >
+          <Badge color="blue" style={{ marginRight: '10px' }}>
+            Average GPA
+          </Badge>
+        </Tooltip>
+        <Tooltip
+          label="Drop/Withdraw Rate"
+          position="bottom"
+          offset={5}
+          transitionProps={{ transition: 'fade-down', duration: 300 }}
+        >
+          <Badge color="red">Drop/Withdraw Rate</Badge>
+        </Tooltip> */}
+      </div>
+
       <Table
         striped
         highlightOnHover
@@ -119,7 +146,7 @@ export function SubjectTable({ selectedQuery }: SubjectTableProps) {
         withColumnBorders
         stickyHeader
         stickyHeaderOffset={69}
-        style={{ maxWidth: '100%', overflowX: 'auto' }}
+        style={{ maxWidth: '100%', overflowX: 'auto', marginTop: '20px' }}
         className="custom-table"
       >
         <Table.Thead>

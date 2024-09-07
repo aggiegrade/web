@@ -16,11 +16,9 @@ interface SubjectAndCourse {
 
 const links = [
   { link: '/', label: 'Home' },
-  // { link: '/instructors', label: 'Instructors' },
-  // { link: '/subject', label: 'Subjects' },
   { link: '/random', label: 'Random' },
-  { link: '/faq', label: 'FAQ' },
-  { link: '/about', label: 'About' },
+  // { link: '/', label: 'FAQ' },
+  // { link: '/', label: 'About' },
 ];
 
 export function HeaderSearch() {
@@ -30,15 +28,38 @@ export function HeaderSearch() {
   const [instructorNames, setInstructorNames] = useState<string[]>([]);
   const [subjectAndCourses, setSubjectAndCourses] = useState<string[]>([]);
 
-  const handleSearch = (item: string) => {
+  const handleSearch = (item: string, group: string) => {
     setSearchTerm(item);
-    router.push(`/subject?query=${encodeURIComponent(item)}`);
+
+    // Route based on the group (Instructors or Courses)
+    if (group === 'Instructors') {
+      router.push(`/instructor?instructor=${encodeURIComponent(item)}`);
+    } else {
+      router.push(`/subject?query=${encodeURIComponent(item)}`);
+    }
+  };
+
+  // Function to randomly select between instructors or courses
+  const handleRandomSelection = () => {
+    const allItems = [...subjectAndCourses, ...instructorNames]; // Combine courses and instructors
+    const randomItem = allItems[Math.floor(Math.random() * allItems.length)]; // Randomly select an item
+
+    // Determine whether the selected item is an instructor or a course
+    const group = instructorNames.includes(randomItem) ? 'Instructors' : 'Courses';
+    handleSearch(randomItem, group);
   };
 
   const items = links.map((link) => (
-    <Link href={link.link} key={link.label} className={classes.link}>
-      {link.label}
-    </Link>
+    link.label === 'Random'
+    ? <div 
+        key={link.label} 
+        className={classes.link} 
+        onClick={handleRandomSelection}
+        style={{ cursor: 'pointer' }} // Make the cursor behave like a link
+      >
+        {link.label}
+      </div>
+    : <Link href={link.link} key={link.label} className={classes.link}>{link.label}</Link>
   ));
 
   useEffect(() => {
@@ -100,7 +121,7 @@ export function HeaderSearch() {
 
         <Autocomplete
           className={classes.search}
-          placeholder="Search"
+          placeholder="Search for a Course/Instructor"
           leftSection={<IconSearch style={{ width: rem(16), height: rem(16) }} stroke={1.5} />}
           data={[
             {
@@ -112,10 +133,13 @@ export function HeaderSearch() {
               items: instructorNames,
             },
           ]}
-          limit={6}
+          limit={5}
+          maxDropdownHeight={500}
           visibleFrom="xs"
           onOptionSubmit={(item) => {
-            handleSearch(item);
+            // Determine if the selected item is an instructor or a course
+            const group = instructorNames.includes(item) ? 'Instructors' : 'Courses';
+            handleSearch(item, group);
           }}
         />
 
