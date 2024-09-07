@@ -105,7 +105,7 @@ export function SubjectTable({ selectedQuery }: SubjectTableProps) {
       <Table.Td>{item.satisfactory}</Table.Td>
       <Table.Td>{item.unsatisfactory}</Table.Td>
       <Table.Td>{item.noGrade}</Table.Td>
-      <Table.Td>{typeof item.averageGPA === 'number' ? item.averageGPA.toFixed(2) : 'N/A'}</Table.Td>
+      <Table.Td>{item.averageGPA}</Table.Td>
     </Table.Tr>
   ));
 
@@ -118,7 +118,7 @@ export function SubjectTable({ selectedQuery }: SubjectTableProps) {
         verticalSpacing="md"
         withColumnBorders
         stickyHeader
-        stickyHeaderOffset={60}
+        stickyHeaderOffset={69}
         style={{ maxWidth: '100%', overflowX: 'auto' }}
         className="custom-table"
       >
