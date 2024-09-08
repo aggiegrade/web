@@ -1,7 +1,9 @@
 'use client';
 import { Table, Loader, Text, Container, Title, Tooltip, Button, Badge } from '@mantine/core';
+import { AreaChart, LineChart } from '@mantine/charts';
 import { useEffect, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
+import '@mantine/charts/styles.css';
 
 interface SubjectTableProps {
   selectedQuery: string | null;
@@ -9,8 +11,7 @@ interface SubjectTableProps {
 
 // Define the data structure for each row
 interface CourseData {
-  semester: string;
-  year: string;
+  term: string; // Changed from semester and year to term
   section: string;
   instructorName: string;
   totalStudents: number;
@@ -48,8 +49,7 @@ export function SubjectTable({ selectedQuery }: SubjectTableProps) {
           const data = await response.json();
 
           const processedData: CourseData[] = data.map((item: any) => ({
-            semester: item.Semester,
-            year: item.Year,
+            term: `${item.Semester} ${item.Year}`, // Combine semester and year into term
             section: item.Section || 'N/A',
             instructorName: item.InstructorName || 'Unknown',
             totalStudents: item.TotalStudents || 0,
@@ -90,8 +90,7 @@ export function SubjectTable({ selectedQuery }: SubjectTableProps) {
   // Map course data to rows
   const rows = courseData.map((item, index) => (
     <Table.Tr key={index}>
-      <Table.Td>{item.semester}</Table.Td>
-      <Table.Td>{item.year}</Table.Td>
+      <Table.Td>{item.term}</Table.Td> {/* Display term instead of semester and year */}
       <Table.Td>{item.section}</Table.Td>
       <Table.Td>{item.instructorName}</Table.Td>
       <Table.Td>{item.totalStudents}</Table.Td>
@@ -109,9 +108,24 @@ export function SubjectTable({ selectedQuery }: SubjectTableProps) {
     </Table.Tr>
   ));
 
+  const courseChartData = [
+    {
+      date: 'FALL 2020',
+      instructor1: 2.53,
+      instructor2: 3.32,
+      instructor3: 3.76,
+    },
+    {
+      date: 'FALL 2021',
+      instructor1: 2.41,
+      instructor2: 3.56,
+      instructor3: 2.85,
+    }
+  ]
+
   return (
     // Displaying Section Title
-    <Container size="lg" style={{ padding: '20px' }}>
+    <Container size="lg" style={{ marginTop: '20px' }}>
       <div>
         <Title order={1} style={{ marginBottom: '5px', marginTop: '-80px' }}>
           {query}
@@ -138,6 +152,23 @@ export function SubjectTable({ selectedQuery }: SubjectTableProps) {
         </Tooltip> */}
       </div>
 
+      <div>
+        <Text size="xl">Data</Text>
+        <LineChart
+          h={600}
+          withLegend
+          data={courseChartData}
+          dataKey="date"
+          series={[
+            { name: 'instructor1', color: 'indigo.6' },
+            { name: 'instructor2', color: 'blue.6' },
+            { name: 'instructor3', color: 'teal.6' },
+          ]}
+          curveType="linear"
+          legendProps={{ verticalAlign: 'bottom', height: 100 }}
+        />
+      </div>
+
       <Table
         striped
         highlightOnHover
@@ -151,8 +182,7 @@ export function SubjectTable({ selectedQuery }: SubjectTableProps) {
       >
         <Table.Thead>
           <Table.Tr>
-            <Table.Th>Semester</Table.Th>
-            <Table.Th>Year</Table.Th>
+            <Table.Th>Term</Table.Th> {/* Change Semester and Year to Term */}
             <Table.Th>Section</Table.Th>
             <Table.Th>Instructor</Table.Th>
             <Table.Th># Enrolled</Table.Th>

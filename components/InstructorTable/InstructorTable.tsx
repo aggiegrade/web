@@ -2,6 +2,7 @@
 import { Table, Loader, Text, Container, Title } from '@mantine/core';
 import { useEffect, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
+import '@mantine/charts/styles.css';
 
 interface InstructorTableProps {
   selectedInstructor: string | null;
