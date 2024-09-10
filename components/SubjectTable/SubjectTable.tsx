@@ -1,7 +1,7 @@
 'use client';
-import { Table, Loader, Text, Container, Title, Tooltip, Button, Badge } from '@mantine/core';
-import { AreaChart, LineChart } from '@mantine/charts';
-import { useEffect, useState } from 'react';
+import { Table, Loader, Text, Container, Title, Tooltip, Button, Badge, Divider } from '@mantine/core';
+import { AreaChart, LineChart, BarChart } from '@mantine/charts';
+import React, { useEffect, useState, useCallback } from 'react';
 import { useSearchParams } from 'next/navigation';
 import '@mantine/charts/styles.css';
 
@@ -28,11 +28,60 @@ interface CourseData {
   averageGPA: number;
 }
 
+interface SectionInfo {
+  term: string;
+  section: string;
+  instructor: string;
+  averageGPA: number;
+}
+
 export function SubjectTable({ selectedQuery }: SubjectTableProps) {
   const searchParams = useSearchParams();
   const query = searchParams.get('query');
   const [courseData, setCourseData] = useState<CourseData[]>([]);
   const [loading, setLoading] = useState(true);
+  const [courseChartData, setCourseChartData] = useState<any[]>([]);
+  const [sectionInfos, setSectionInfos] = useState<SectionInfo[]>([]);
+
+  // Memoize processChartData function
+  const processChartData = useCallback((data: CourseData[]) => {
+    const termMap = new Map<string, { [instructor: string]: number[] }>();
+
+    // Group data by term and instructor
+    data.forEach((item) => {
+      if (!termMap.has(item.term)) {
+        termMap.set(item.term, {});
+      }
+      const termData = termMap.get(item.term)!;
+      if (!termData[item.instructorName]) {
+        termData[item.instructorName] = [];
+      }
+      termData[item.instructorName].push(item.averageGPA);
+    });
+
+    // Calculate averages and format data for the chart
+    const chartData = Array.from(termMap.entries()).map(([term, instructors]) => {
+      const chartItem: any = { term };
+      Object.entries(instructors).forEach(([instructor, gpas]) => {
+        const avgGPA = gpas.reduce((sum, gpa) => sum + gpa, 0) / gpas.length;
+        chartItem[instructor] = Number(avgGPA.toFixed(2));
+      });
+      return chartItem;
+    });
+
+    // Sort the chart data chronologically
+    return chartData.sort((a, b) => {
+      const [aSemester, aYear] = a.term.split(' ');
+      const [bSemester, bYear] = b.term.split(' ');
+      
+      if (aYear !== bYear) {
+        return parseInt(aYear) - parseInt(bYear);
+      }
+      
+      const semesterOrder = { 'SPRING': 0, 'SUMMER': 1, 'FALL': 2 };
+      return semesterOrder[aSemester as keyof typeof semesterOrder] - semesterOrder[bSemester as keyof typeof semesterOrder];
+    });
+  }, []);
 
   useEffect(() => {
     if (query) {
@@ -63,10 +112,25 @@ export function SubjectTable({ selectedQuery }: SubjectTableProps) {
             satisfactory: item.Satisfactory || 0,
             unsatisfactory: item.Unsatisfactory || 0,
             noGrade: item.NoGrade || 0,
-            averageGPA: item.Average_GPA || 0,
+            averageGPA: parseFloat(item.Average_GPA) || null,
           }));
 
           setCourseData(processedData);
+
+          // Create sectionInfos array
+          const newSectionInfos: SectionInfo[] = processedData.map(item => ({
+            term: item.term,
+            section: item.section,
+            instructor: item.instructorName,
+            averageGPA: item.averageGPA
+          }));
+          setSectionInfos(newSectionInfos);
+          console.log('Section Infos:', sectionInfos);
+
+          // Process data for the chart
+          const chartData = processChartData(processedData);
+          setCourseChartData(chartData);
+          console.log('Chart data processed:', chartData);
         } catch (error) {
           console.error('Failed to fetch course data:', error);
         } finally {
@@ -76,7 +140,14 @@ export function SubjectTable({ selectedQuery }: SubjectTableProps) {
 
       fetchCourseData();
     }
-  }, [query]);
+  }, [query, processChartData]);
+
+  // New useEffect to log courseChartData when it changes
+  useEffect(() => {
+    console.log('courseChartData updated:', courseChartData);
+  }, [courseChartData]);
+
+  console.log('SubjectTable rendering, courseChartData length:', courseChartData.length);
 
   if (loading) {
     return (
@@ -108,26 +179,11 @@ export function SubjectTable({ selectedQuery }: SubjectTableProps) {
     </Table.Tr>
   ));
 
-  const courseChartData = [
-    {
-      date: 'FALL 2020',
-      instructor1: 2.53,
-      instructor2: 3.32,
-      instructor3: 3.76,
-    },
-    {
-      date: 'FALL 2021',
-      instructor1: 2.41,
-      instructor2: 3.56,
-      instructor3: 2.85,
-    }
-  ]
-
   return (
     // Displaying Section Title
     <Container size="lg" style={{ marginTop: '20px' }}>
       <div>
-        <Title order={1} style={{ marginBottom: '5px', marginTop: '-80px' }}>
+        <Title order={1} style={{ marginBottom: '5px', marginTop: '0px' }}>
           {query}
         </Title>
 
@@ -151,21 +207,25 @@ export function SubjectTable({ selectedQuery }: SubjectTableProps) {
           <Badge color="red">Drop/Withdraw Rate</Badge>
         </Tooltip> */}
       </div>
-
+      <Divider my="md" size={8} label="Data" />
       <div>
-        <Text size="xl">Data</Text>
-        <LineChart
-          h={600}
-          withLegend
+        <Title order={4} style={{ marginBottom: '20px' }}>{query} Average GPA over time by Instructor</Title>
+        <BarChart
+          h={300}
           data={courseChartData}
-          dataKey="date"
-          series={[
-            { name: 'instructor1', color: 'indigo.6' },
-            { name: 'instructor2', color: 'blue.6' },
-            { name: 'instructor3', color: 'teal.6' },
-          ]}
-          curveType="linear"
-          legendProps={{ verticalAlign: 'bottom', height: 100 }}
+          dataKey="term"
+          series={
+            getAllInstructors(courseChartData).map((instructor, index) => ({
+              name: instructor,
+              color: `var(--mantine-color-${['indigo', 'blue', 'teal', 'cyan', 'green', 'yellow', 'orange', 'red'][index % 8]}-6)`,
+            }))
+          }
+          tickLine="y"
+          yAxisProps={{ domain: [0, 4] }} // Assuming GPA range is 0-4
+          withLegend
+          orientation="horizontal"
+          tooltipAnimationDuration={200}
+          legendProps={{ verticalAlign: 'bottom', height: 50 }}
         />
       </div>
 
@@ -205,3 +265,14 @@ export function SubjectTable({ selectedQuery }: SubjectTableProps) {
     </Container>
   );
 }
+
+// Move this function outside of useCallback
+const getAllInstructors = (data: any[]) => {
+  const instructors = new Set<string>();
+  data.forEach(item => {
+    Object.keys(item).forEach(key => {
+      if (key !== 'term') instructors.add(key);
+    });
+  });
+  return Array.from(instructors);
+};

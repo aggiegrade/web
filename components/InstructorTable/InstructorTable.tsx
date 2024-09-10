@@ -1,6 +1,7 @@
 'use client';
-import { Table, Loader, Text, Container, Title } from '@mantine/core';
-import { useEffect, useState } from 'react';
+import { Table, Loader, Text, Container, Title, Divider } from '@mantine/core';
+import { BarChart } from '@mantine/charts';
+import { useEffect, useState, useCallback } from 'react';
 import { useSearchParams } from 'next/navigation';
 import '@mantine/charts/styles.css';
 
@@ -35,6 +36,44 @@ export function InstructorTable({ selectedInstructor }: InstructorTableProps) {
   const instructorName = searchParams.get('instructor');
   const [sectionsData, setSectionsData] = useState<InstructorSectionData[]>([]);
   const [loading, setLoading] = useState(true);
+  const [instructorChartData, setInstructorChartData] = useState<any[]>([]);
+
+  const processChartData = useCallback((data: InstructorSectionData[]) => {
+    const termCourseMap = new Map<string, Map<string, { totalGPA: number; count: number }>>();
+
+    data.forEach((item) => {
+      const term = `${item.semester.toUpperCase()} ${item.year}`;
+      const course = `${item.subject} ${item.course}`;
+      
+      if (!termCourseMap.has(term)) {
+        termCourseMap.set(term, new Map());
+      }
+      const courseMap = termCourseMap.get(term)!;
+      
+      if (!courseMap.has(course)) {
+        courseMap.set(course, { totalGPA: 0, count: 0 });
+      }
+      const courseData = courseMap.get(course)!;
+      
+      if (!isNaN(item.averageGPA)) {
+        courseData.totalGPA += Number(item.averageGPA); // Convert to number before adding
+        courseData.count++;
+      }
+
+    });
+
+    console.log('Processed chart data:', Array.from(termCourseMap.entries()));
+
+    return Array.from(termCourseMap.entries()).map(([term, courseMap]) => {
+      const chartItem: any = { term };
+      courseMap.forEach((data, course) => {
+        if (data.count > 0) {
+          chartItem[course] = Number((data.totalGPA / data.count).toFixed(2));
+        }
+      });
+      return chartItem;
+    });
+  }, []);
 
   useEffect(() => {
     if (instructorName) {
@@ -72,6 +111,11 @@ export function InstructorTable({ selectedInstructor }: InstructorTableProps) {
           }));
 
           setSectionsData(processedData);
+
+          // Process data for the chart
+          const chartData = processChartData(processedData);
+          setInstructorChartData(chartData);
+          console.log('Instructor Chart Data:', chartData);
         } catch (error) {
           console.error('Failed to fetch section data:', error);
         } finally {
@@ -81,7 +125,7 @@ export function InstructorTable({ selectedInstructor }: InstructorTableProps) {
 
       fetchSectionsData();
     }
-  }, [instructorName]);
+  }, [instructorName, processChartData]);
 
   if (loading) {
     return (
@@ -91,6 +135,16 @@ export function InstructorTable({ selectedInstructor }: InstructorTableProps) {
       </div>
     );
   }
+
+  const getAllCourses = (data: any[]) => {
+    const courses = new Set<string>();
+    data.forEach(item => {
+      Object.keys(item).forEach(key => {
+        if (key !== 'term') courses.add(key);
+      });
+    });
+    return Array.from(courses);
+  };
 
   // Map sections data to rows, combining Semester + Year into "Term" and Subject + Course into "Course"
   const rows = sectionsData.map((item, index) => {
@@ -120,10 +174,34 @@ export function InstructorTable({ selectedInstructor }: InstructorTableProps) {
   });
 
   return (
-    <Container size="lg" style={{ padding: '0px', marginTop: '-80px' }}>
+    <Container size="lg" style={{ padding: '0px', marginTop: '0px' }}>
       <Title order={1} style={{ marginBottom: '5px' }}>
         {instructorName}
       </Title>
+
+      <Divider my="md" size={8} label="Data" />
+      <div>
+        <Title order={4} style={{ marginBottom: '20px' }}>Average GPA over time by Course</Title>
+        <BarChart
+          h={300}
+          data={instructorChartData}
+          dataKey="term"
+          series={
+            getAllCourses(instructorChartData).map((course, index) => ({
+              name: course,
+              color: `var(--mantine-color-${['indigo', 'blue', 'teal', 'cyan', 'green', 'yellow', 'orange', 'red'][index % 8]}-6)`,
+            }))
+          }
+          tickLine="y"
+          yAxisProps={{ domain: [0, 4] }}
+          withLegend
+          orientation="horizontal"
+          tooltipAnimationDuration={200}
+          legendProps={{ verticalAlign: 'bottom', height: 10 }}
+          xAxisLabel="Term"
+          yAxisLabel="GPA"
+        />
+      </div>
 
       <Table
         striped
