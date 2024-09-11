@@ -60,7 +60,7 @@ export function Footer() {
         </Text>
 
         <Group className={classes.links}>
-            Version 0.0.1, Commit:
+            Version 0.2, Commit:
             {latestCommit ? (
               <Anchor href={commitUrl || undefined} className={classes.commitLink}>
                 {latestCommit.slice(0, 7)} {/* Show only the first 7 characters of the commit SHA */}
