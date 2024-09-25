@@ -10,26 +10,26 @@ import {
   Container,
   rem,
   useMantineTheme,
+  Alert,
 } from '@mantine/core';
+import { IconInfoCircle } from '@tabler/icons-react';
 import classes from './Welcome.module.css';
 
 const mockdata = [
   {
-    "title": "Courses",
-    "description": "Explore detailed grade distributions for all courses offered at Texas A&M University. Analyze trends, average grades, and course difficulty to make informed decisions about your schedule.",
+    "title": "Data",
+    "description": "Courses and Instructors from 2019 to 2024 (excluding summer/fall 2024) are available. More data will be added in the future.",
     "icon": "",
   },
   {
-    "title": "Instructors",
-    "description": "Find grade distributions by instructor. See how different professors grade and compare their teaching styles to choose the best fit for your learning experience.",
-    "icon": "",
-  },
-  {
-    "title": "Resources",
-    "description": "Access a variety of resources, including study guides, past exams, and other academic tools to help you succeed in your courses at Texas A&M University.",
+    "title": "Updates",
+    "description": (
+      <>
+        Not every course is available for every term. Check out the latest updates to see what's available. Database is still in the early stages, but more courses will be added soon.
+      </>
+    ),
     "icon": "",
   }
-  ,
 ];
 
 export function Welcome() {
@@ -46,7 +46,7 @@ export function Welcome() {
   ));
   return (
     <>
-      <Title className={classes.title} ta="center">
+      <Title className={classes.title} ta="center" style={{ marginTop: '100px' }}>
         Welcome to{' '}
         <Text inherit variant="gradient" component="span" gradient={{ from: 'pink', to: 'yellow' }}>
           AggieGrade
@@ -54,16 +54,17 @@ export function Welcome() {
       </Title>
       <Text c="dimmed" ta="center" size="lg" mx="auto" mt="xl">
         {' '}
-        View and analyze grade distribution data for any past Texas A&M University course
+        View and analyze grade distribution data for past Texas A&M University courses and instructors.
       </Text>
 
       <Container size="lg" py="xl">
-
-        <SimpleGrid cols={{ base: 1, md: 3 }} spacing="xl" mt={50}>
+        <SimpleGrid cols={{ base: 1, md: 2 }} spacing="xl" mt={50}>
           {features}
         </SimpleGrid>
+        <Alert variant="filled" color="rgba(107, 20, 20, 1)" title="Disclaimer" icon={<IconInfoCircle />} style={{ marginTop: '20px' }}>
+          If a course description and title does not display, that means the course was not found on the A&M course catalog.
+        </Alert>
       </Container>
-
     </>
   );
 }

@@ -13,30 +13,6 @@ const links = [
 ];
 
 export function Footer() {
-  const [latestCommit, setLatestCommit] = useState<string | null>(null);
-  const [commitUrl, setCommitUrl] = useState<string | null>(null);
-
-  useEffect(() => {
-    // Fetch the latest commit from GitHub API
-    const fetchLatestCommit = async () => {
-      try {
-        const response = await fetch('https://api.github.com/repos/aggiegrade/web/commits/main', {
-          headers: {
-            Authorization: `token ${process.env.NEXT_PUBLIC_GITHUB_TOKEN}`,
-          },
-        });
-        const data = await response.json();
-        const commitSha = data.sha;
-        const commitUrl = data.html_url;
-        setLatestCommit(commitSha);
-        setCommitUrl(commitUrl);
-      } catch (error) {
-        console.error('Failed to fetch latest commit:', error);
-      }
-    };
-
-    fetchLatestCommit();
-  }, []);
 
   const items = links.map((link) => (
     <Anchor
@@ -60,14 +36,7 @@ export function Footer() {
         </Text>
 
         <Group className={classes.links}>
-            Version 0.2, Commit:
-            {latestCommit ? (
-              <Anchor href={commitUrl || undefined} className={classes.commitLink}>
-                {latestCommit.slice(0, 7)} {/* Show only the first 7 characters of the commit SHA */}
-              </Anchor>
-            ) : (
-              'Loading...'
-            )}
+            Version 0.2
             {items}
         </Group>
 

@@ -1,13 +1,19 @@
 import { Switch, useMantineTheme, rem, Group } from '@mantine/core';
 import { IconSun, IconMoonStars } from '@tabler/icons-react';
-import { useMantineColorScheme, useComputedColorScheme } from '@mantine/core';
+import { useMantineColorScheme } from '@mantine/core';
+import { useEffect, useState } from 'react';
 
 export function ActionToggle() {
-  const { setColorScheme } = useMantineColorScheme();
-  const computedColorScheme = useComputedColorScheme('light', { getInitialValueInEffect: true });
+  const { colorScheme, toggleColorScheme } = useMantineColorScheme();
   const theme = useMantineTheme();
+  const [mounted, setMounted] = useState(false);
 
-  // Icons for the switch
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  if (!mounted) return null; // Prevent SSR mismatch
+
   const sunIcon = (
     <IconSun
       style={{ width: rem(16), height: rem(16) }}
@@ -24,19 +30,18 @@ export function ActionToggle() {
     />
   );
 
-  // Handler to toggle color scheme
   const handleToggle = () => {
-    setColorScheme(computedColorScheme === 'light' ? 'dark' : 'light');
+    toggleColorScheme();
   };
 
   return (
-    <Group justify="center">
+    <Group align="center">
       <Switch
         size="md"
         color="dark.4"
         onLabel={sunIcon}
         offLabel={moonIcon}
-        checked={computedColorScheme === 'dark'}
+        checked={colorScheme === 'dark'}
         onChange={handleToggle}
       />
     </Group>

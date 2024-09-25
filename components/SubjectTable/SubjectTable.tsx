@@ -1,6 +1,6 @@
 'use client';
 import { Table, Loader, Text, Container, Title, Tooltip, Badge, Divider } from '@mantine/core';
-import { AreaChart, LineChart, BarChart, DonutChart } from '@mantine/charts';
+import { AreaChart, LineChart, BarChart, DonutChart, PieChart } from '@mantine/charts';
 import React, { useEffect, useState, useCallback } from 'react';
 import { useSearchParams } from 'next/navigation';
 import parse, { domToReact } from 'html-react-parser'; // Import html-react-parser and domToReact
@@ -130,12 +130,12 @@ export function SubjectTable({ selectedQuery }: SubjectTableProps) {
             averageGPA: item.averageGPA,
           }));
           setSectionInfos(newSectionInfos);
-          console.log('Section Infos:', sectionInfos);
+          // console.log('Section Infos:', sectionInfos); // Debugging
 
           // Process data for the chart
           const chartData = processChartData(processedData);
           setCourseChartData(chartData);
-          console.log('Chart data processed:', chartData);
+          // console.log('Chart data processed:', chartData); // Debugging
         } catch (error) {
           console.error('Failed to fetch course data:', error);
         } finally {
@@ -250,10 +250,10 @@ export function SubjectTable({ selectedQuery }: SubjectTableProps) {
 
   // New useEffect to log courseChartData when it changes
   useEffect(() => {
-    console.log('courseChartData updated:', courseChartData);
+    // console.log('courseChartData updated:', courseChartData); // Debugging
   }, [courseChartData]);
 
-  console.log('SubjectTable rendering, courseChartData length:', courseChartData.length);
+  // console.log('SubjectTable rendering, courseChartData length:', courseChartData.length); // Debugging
 
   if (loading) {
     return (
@@ -298,23 +298,27 @@ export function SubjectTable({ selectedQuery }: SubjectTableProps) {
   // Map course data to rows
   const rows = courseData.map((item, index) => (
     <Table.Tr key={index}>
-      <Table.Td>{item.term}</Table.Td> {/* Display term instead of semester and year */}
-      <Table.Td>{item.section}</Table.Td>
-      <Table.Td>{item.instructorName}</Table.Td>
-      <Table.Td>{item.totalStudents}</Table.Td>
-      <Table.Td>{item.a}</Table.Td>
-      <Table.Td>{item.b}</Table.Td>
-      <Table.Td>{item.c}</Table.Td>
-      <Table.Td>{item.d}</Table.Td>
-      <Table.Td>{item.f}</Table.Td>
-      <Table.Td>{item.droppedWithdrawn}</Table.Td>
-      <Table.Td>{item.incomplete}</Table.Td>
-      <Table.Td>{item.satisfactory}</Table.Td>
-      <Table.Td>{item.unsatisfactory}</Table.Td>
-      <Table.Td>{item.noGrade}</Table.Td>
-      <Table.Td>{item.averageGPA}</Table.Td>
+      <React.Fragment>
+        <Table.Td>{item.term.trim()}</Table.Td>
+        <Table.Td>{item.section.trim()}</Table.Td>
+        <Table.Td>{item.instructorName.trim()}</Table.Td>
+        <Table.Td>{item.totalStudents}</Table.Td>
+        <Table.Td>{item.a}</Table.Td>
+        <Table.Td>{item.b}</Table.Td>
+        <Table.Td>{item.c}</Table.Td>
+        <Table.Td>{item.d}</Table.Td>
+        <Table.Td>{item.f}</Table.Td>
+        <Table.Td>{item.droppedWithdrawn}</Table.Td>
+        <Table.Td>{item.incomplete}</Table.Td>
+        <Table.Td>{item.satisfactory}</Table.Td>
+        <Table.Td>{item.unsatisfactory}</Table.Td>
+        <Table.Td>{item.noGrade}</Table.Td>
+        <Table.Td>{item.averageGPA}</Table.Td>
+      </React.Fragment>
     </Table.Tr>
   ));
+  
+  
 
   return (
     // Displaying Section Title
@@ -364,9 +368,11 @@ export function SubjectTable({ selectedQuery }: SubjectTableProps) {
       <Divider my="md" size={8} label="Data" />
       <div>
         <Title order={4} style={{ marginBottom: '20px' }}>
-          {query} Average GPA over time by Instructor
+          Average GPA over time by Instructor
         </Title>
         <BarChart
+          xAxisLabel="Term"
+          yAxisLabel="Average GPA"
           h={300}
           data={courseChartData}
           dataKey="term"
@@ -379,19 +385,21 @@ export function SubjectTable({ selectedQuery }: SubjectTableProps) {
           withLegend
           orientation="horizontal"
           tooltipAnimationDuration={200}
-          legendProps={{ verticalAlign: 'bottom', height: 50 }}
+          legendProps={{ verticalAlign: 'bottom', height: 80 }}
         />
       </div>
 
-      <Divider my="md" size={8} label="Student Grades" />
+      <Divider my="md" size={10} label="Student Grades" style={{ marginTop: '50px' }} />
       <div style={{ display: 'flex', justifyContent: 'center' }}>
-        <DonutChart
+        <PieChart
           data={donutChartData}
-          withLabels={false}
-          chartLabel="Student Grades"
-          size={250}
-          paddingAngle={10}
-          tooltipDataSource="segment"
+          size={300}
+          withLabels
+          withTooltip
+          labelsPosition="outside"
+          labelsType="percent"
+          strokeWidth={1}
+          tooltipDataSource='segment'
         />
       </div>
 

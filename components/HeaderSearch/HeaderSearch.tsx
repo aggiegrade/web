@@ -46,7 +46,12 @@ export function HeaderSearch() {
 
     // Determine whether the selected item is an instructor or a course
     const group = instructorNames.includes(randomItem) ? 'Instructors' : 'Courses';
-    handleSearch(randomItem, group);
+    const url = group === 'Instructors'
+      ? `/instructor?instructor=${encodeURIComponent(randomItem)}`
+      : `/subject?query=${encodeURIComponent(randomItem)}`;
+
+    // Use window.location.href to force a full page reload
+    window.location.href = url;
   };
 
   const items = links.map((link) => (

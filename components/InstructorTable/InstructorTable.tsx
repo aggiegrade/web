@@ -1,6 +1,6 @@
 'use client';
-import { Table, Loader, Text, Container, Title, Divider } from '@mantine/core';
-import { BarChart } from '@mantine/charts';
+import { Table, Loader, Text, Container, Title, Divider, Tooltip, Badge } from '@mantine/core';
+import { BarChart, DonutChart, PieChart } from '@mantine/charts';
 import { useEffect, useState, useCallback } from 'react';
 import { useSearchParams } from 'next/navigation';
 import '@mantine/charts/styles.css';
@@ -62,7 +62,7 @@ export function InstructorTable({ selectedInstructor }: InstructorTableProps) {
 
     });
 
-    console.log('Processed chart data:', Array.from(termCourseMap.entries()));
+    // console.log('Processed chart data:', Array.from(termCourseMap.entries())); // Debugging
 
     return Array.from(termCourseMap.entries()).map(([term, courseMap]) => {
       const chartItem: any = { term };
@@ -115,7 +115,7 @@ export function InstructorTable({ selectedInstructor }: InstructorTableProps) {
           // Process data for the chart
           const chartData = processChartData(processedData);
           setInstructorChartData(chartData);
-          console.log('Instructor Chart Data:', chartData);
+          // console.log('Instructor Chart Data:', chartData); // Debugging
         } catch (error) {
           console.error('Failed to fetch section data:', error);
         } finally {
@@ -146,6 +146,72 @@ export function InstructorTable({ selectedInstructor }: InstructorTableProps) {
     return Array.from(courses);
   };
 
+  // Calculate average GPA and drop/withdraw rate
+  const totalGPA = sectionsData.reduce((sum, item) => sum + item.averageGPA * item.totalStudents, 0);
+  const totalStudents = sectionsData.reduce((sum, item) => sum + item.totalStudents, 0);
+  const averageGPA = totalStudents ? (totalGPA / totalStudents).toFixed(2) : 'N/A';
+
+  const totalDroppedWithdrawn = sectionsData.reduce((sum, item) => sum + item.droppedWithdrawn, 0);
+  const dropWithdrawRate = totalStudents
+    ? ((totalDroppedWithdrawn / totalStudents) * 100).toFixed(2)
+    : 'N/A';
+
+  // Calculate basic information
+  const terms = sectionsData.map((item) => `${item.semester.toUpperCase()} ${item.year}`);
+  const sortedTerms = terms.sort((a, b) => {
+    const [aSemester, aYear] = a.split(' ');
+    const [bSemester, bYear] = b.split(' ');
+
+    if (aYear !== bYear) {
+      return parseInt(aYear) - parseInt(bYear);
+    }
+
+    const semesterOrder = { SPRING: 0, SUMMER: 1, FALL: 2 };
+    return (
+      semesterOrder[aSemester as keyof typeof semesterOrder] -
+      semesterOrder[bSemester as keyof typeof semesterOrder]
+    );
+  });
+  const earliestRecord = sortedTerms.length ? sortedTerms[0] : 'N/A';
+  const latestRecord = sortedTerms.length ? sortedTerms[sortedTerms.length - 1] : 'N/A';
+  const courses = new Set(sectionsData.map((item) => `${item.subject} ${item.course}`));
+  const numberOfCourses = courses.size;
+  const numberOfSections = sectionsData.length;
+  const averageStudentsPerSection = numberOfSections
+    ? Math.ceil(totalStudents / numberOfSections)
+    : 'N/A';
+
+  // Aggregate student grades for the DonutChart
+  const gradeCounts = sectionsData.reduce(
+    (acc, item) => {
+      acc.a += item.a;
+      acc.b += item.b;
+      acc.c += item.c;
+      acc.d += item.d;
+      acc.f += item.f;
+      acc.q += item.droppedWithdrawn;
+      acc.i += item.incomplete;
+      acc.s += item.satisfactory;
+      acc.u += item.unsatisfactory;
+      acc.x += item.noGrade;
+      return acc;
+    },
+    { a: 0, b: 0, c: 0, d: 0, f: 0, q: 0, i: 0, s: 0, u: 0, x: 0 }
+  );
+
+  const donutChartData = [
+    { name: 'A', value: gradeCounts.a, color: 'green' },
+    { name: 'B', value: gradeCounts.b, color: 'blue' },
+    { name: 'C', value: gradeCounts.c, color: 'yellow' },
+    { name: 'D', value: gradeCounts.d, color: 'orange' },
+    { name: 'F', value: gradeCounts.f, color: 'red' },
+    { name: 'Dropped/Withdrawn', value: gradeCounts.q, color: 'gray' },
+    { name: 'Incomplete', value: gradeCounts.i, color: 'purple' },
+    { name: 'Satisfactory', value: gradeCounts.s, color: 'teal' },
+    { name: 'Unsatisfactory', value: gradeCounts.u, color: 'pink' },
+    { name: 'No Grade', value: gradeCounts.x, color: 'brown' },
+  ].filter(segment => segment.value > 0); // Filter out segments with zero value
+
   // Map sections data to rows, combining Semester + Year into "Term" and Subject + Course into "Course"
   const rows = sectionsData.map((item, index) => {
     const term = `${item.semester.toUpperCase()} ${item.year}`; // Combine Semester + Year into Term
@@ -153,31 +219,45 @@ export function InstructorTable({ selectedInstructor }: InstructorTableProps) {
 
     return (
       <Table.Tr key={index}>
-        <Table.Td>{term}</Table.Td>
-        <Table.Td>{course}</Table.Td>
-        <Table.Td>{item.section}</Table.Td>
-        <Table.Td>{item.departmentName}</Table.Td>
-        <Table.Td>{item.totalStudents}</Table.Td>
-        <Table.Td>{item.a}</Table.Td>
-        <Table.Td>{item.b}</Table.Td>
-        <Table.Td>{item.c}</Table.Td>
-        <Table.Td>{item.d}</Table.Td>
-        <Table.Td>{item.f}</Table.Td>
-        <Table.Td>{item.droppedWithdrawn}</Table.Td>
-        <Table.Td>{item.incomplete}</Table.Td>
-        <Table.Td>{item.satisfactory}</Table.Td>
-        <Table.Td>{item.unsatisfactory}</Table.Td>
-        <Table.Td>{item.noGrade}</Table.Td>
-        <Table.Td>{item.averageGPA}</Table.Td>
+        <Table.Td>{term}</Table.Td><Table.Td>{course}</Table.Td><Table.Td>{item.section}</Table.Td><Table.Td>{item.departmentName}</Table.Td><Table.Td>{item.totalStudents}</Table.Td><Table.Td>{item.a}</Table.Td><Table.Td>{item.b}</Table.Td><Table.Td>{item.c}</Table.Td><Table.Td>{item.d}</Table.Td><Table.Td>{item.f}</Table.Td><Table.Td>{item.droppedWithdrawn}</Table.Td><Table.Td>{item.incomplete}</Table.Td><Table.Td>{item.satisfactory}</Table.Td><Table.Td>{item.unsatisfactory}</Table.Td><Table.Td>{item.noGrade}</Table.Td><Table.Td>{item.averageGPA}</Table.Td>
       </Table.Tr>
     );
   });
 
   return (
-    <Container size="lg" style={{ padding: '0px', marginTop: '0px' }}>
+    <Container size="lg" style={{ padding: '0px', marginTop: '20px' }}>
       <Title order={1} style={{ marginBottom: '5px' }}>
         {instructorName}
       </Title>
+
+      {/* Display averages below title */}
+      <Tooltip
+        label="Grade Point Average"
+        position="bottom"
+        offset={5}
+        transitionProps={{ transition: 'fade-down', duration: 300 }}
+      >
+        <Badge color="blue" style={{ marginRight: '10px' }}>
+          {averageGPA} GPA
+        </Badge>
+      </Tooltip>
+      <Tooltip
+        label="Drop/Withdraw Rate"
+        position="bottom"
+        offset={5}
+        transitionProps={{ transition: 'fade-down', duration: 300 }}
+      >
+        <Badge color="red">{dropWithdrawRate}% D/W</Badge>
+      </Tooltip>
+
+      <Divider my="md" size={8} label="Basic Information" />
+      <div>
+        <Text>Earliest Record: {earliestRecord}</Text>
+        <Text>Latest Record: {latestRecord}</Text>
+        <Text># of Courses: {numberOfCourses}</Text>
+        <Text># of Sections: {numberOfSections}</Text>
+        <Text>Average # of Students per Section: {averageStudentsPerSection}</Text>
+      </div>
 
       <Divider my="md" size={8} label="Data" />
       <div>
@@ -197,9 +277,23 @@ export function InstructorTable({ selectedInstructor }: InstructorTableProps) {
           withLegend
           orientation="horizontal"
           tooltipAnimationDuration={200}
-          legendProps={{ verticalAlign: 'bottom', height: 10 }}
+          legendProps={{ verticalAlign: 'bottom', height: 80 }}
           xAxisLabel="Term"
           yAxisLabel="GPA"
+        />
+      </div>
+
+      <Divider my="md" size={10} label="Student Grades" style={{ marginTop: '50px' }} />
+      <div style={{ display: 'flex', justifyContent: 'center' }}>
+        <PieChart
+          data={donutChartData}
+          size={300}
+          withLabels
+          withTooltip
+          labelsPosition="outside"
+          labelsType="percent"
+          strokeWidth={1}
+          tooltipDataSource='segment'
         />
       </div>
 
@@ -220,18 +314,72 @@ export function InstructorTable({ selectedInstructor }: InstructorTableProps) {
             <Table.Th>Course</Table.Th> {/* Combined Subject + Course */}
             <Table.Th>Section</Table.Th>
             <Table.Th>Department</Table.Th>
-            <Table.Th># Enrolled</Table.Th>
-            <Table.Th>A</Table.Th>
-            <Table.Th>B</Table.Th>
-            <Table.Th>C</Table.Th>
-            <Table.Th>D</Table.Th>
-            <Table.Th>F</Table.Th>
-            <Table.Th>Q</Table.Th>
-            <Table.Th>I</Table.Th>
-            <Table.Th>S</Table.Th>
-            <Table.Th>U</Table.Th>
-            <Table.Th>X</Table.Th>
-            <Table.Th>Average GPA</Table.Th>
+            <Tooltip
+              label="Total number of students who have been enrolled in this course"
+              transitionProps={{ transition: 'scale-y', duration: 300 }}
+            >
+              <Table.Th># Enrolled</Table.Th>
+            </Tooltip>
+            <Tooltip
+              label="Number of A's given for this section"
+              transitionProps={{ transition: 'scale-y', duration: 300 }}
+            >
+              <Table.Th>A</Table.Th>
+            </Tooltip>
+            <Tooltip
+              label="Number of B's given for this section"
+              transitionProps={{ transition: 'scale-y', duration: 300 }}
+            >
+              <Table.Th>B</Table.Th>
+            </Tooltip>
+            <Tooltip
+              label="Number of C's given for this section"
+              transitionProps={{ transition: 'scale-y', duration: 300 }}
+            >
+              <Table.Th>C</Table.Th>
+            </Tooltip>
+            <Tooltip
+              label="Number of D's given for this section"
+              transitionProps={{ transition: 'scale-y', duration: 300 }}
+            >
+              <Table.Th>D</Table.Th>
+            </Tooltip>
+            <Tooltip
+              label="Number of F's given for this section"
+              transitionProps={{ transition: 'scale-y', duration: 300 }}
+            >
+              <Table.Th>F</Table.Th>
+            </Tooltip>
+            <Tooltip
+              label="Dropped/Withdrawn"
+              transitionProps={{ transition: 'scale-y', duration: 300 }}
+            >
+              <Table.Th>Q</Table.Th>
+            </Tooltip>
+            <Tooltip label="Incomplete" transitionProps={{ transition: 'scale-y', duration: 300 }}>
+              <Table.Th>I</Table.Th>
+            </Tooltip>
+            <Tooltip
+              label="Satisfactory"
+              transitionProps={{ transition: 'scale-y', duration: 300 }}
+            >
+              <Table.Th>S</Table.Th>
+            </Tooltip>
+            <Tooltip
+              label="Unsatisfactory"
+              transitionProps={{ transition: 'scale-y', duration: 300 }}
+            >
+              <Table.Th>U</Table.Th>
+            </Tooltip>
+            <Tooltip label="No Grade" transitionProps={{ transition: 'scale-y', duration: 300 }}>
+              <Table.Th>X</Table.Th>
+            </Tooltip>
+            <Tooltip
+              label="Grade Point Average for this section"
+              transitionProps={{ transition: 'scale-y', duration: 300 }}
+            >
+              <Table.Th>Average GPA</Table.Th>
+            </Tooltip>
           </Table.Tr>
         </Table.Thead>
         <Table.Tbody>{rows}</Table.Tbody>
