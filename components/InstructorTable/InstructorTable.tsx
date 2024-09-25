@@ -56,7 +56,7 @@ export function InstructorTable({ selectedInstructor }: InstructorTableProps) {
       const courseData = courseMap.get(course)!;
       
       if (!isNaN(item.averageGPA)) {
-        courseData.totalGPA += Number(item.averageGPA); // Convert to number before adding
+        courseData.totalGPA += Number(item.averageGPA);
         courseData.count++;
       }
 
@@ -210,12 +210,12 @@ export function InstructorTable({ selectedInstructor }: InstructorTableProps) {
     { name: 'Satisfactory', value: gradeCounts.s, color: 'teal' },
     { name: 'Unsatisfactory', value: gradeCounts.u, color: 'pink' },
     { name: 'No Grade', value: gradeCounts.x, color: 'brown' },
-  ].filter(segment => segment.value > 0); // Filter out segments with zero value
+  ].filter(segment => segment.value > 0);
 
   // Map sections data to rows, combining Semester + Year into "Term" and Subject + Course into "Course"
   const rows = sectionsData.map((item, index) => {
-    const term = `${item.semester.toUpperCase()} ${item.year}`; // Combine Semester + Year into Term
-    const course = `${item.subject} ${item.course}`; // Combine Subject + Course into Course
+    const term = `${item.semester.toUpperCase()} ${item.year}`;
+    const course = `${item.subject} ${item.course}`;
 
     return (
       <Table.Tr key={index}>
@@ -310,8 +310,8 @@ export function InstructorTable({ selectedInstructor }: InstructorTableProps) {
       >
         <Table.Thead>
           <Table.Tr>
-            <Table.Th>Term</Table.Th> {/* Combined Semester + Year */}
-            <Table.Th>Course</Table.Th> {/* Combined Subject + Course */}
+            <Table.Th>Term</Table.Th>
+            <Table.Th>Course</Table.Th>
             <Table.Th>Section</Table.Th>
             <Table.Th>Department</Table.Th>
             <Tooltip

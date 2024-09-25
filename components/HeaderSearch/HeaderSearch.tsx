@@ -41,8 +41,8 @@ export function HeaderSearch() {
 
   // Function to randomly select between instructors or courses
   const handleRandomSelection = () => {
-    const allItems = [...subjectAndCourses, ...instructorNames]; // Combine courses and instructors
-    const randomItem = allItems[Math.floor(Math.random() * allItems.length)]; // Randomly select an item
+    const allItems = [...subjectAndCourses, ...instructorNames];
+    const randomItem = allItems[Math.floor(Math.random() * allItems.length)];
 
     // Determine whether the selected item is an instructor or a course
     const group = instructorNames.includes(randomItem) ? 'Instructors' : 'Courses';
@@ -60,7 +60,7 @@ export function HeaderSearch() {
         key={link.label} 
         className={classes.link} 
         onClick={handleRandomSelection}
-        style={{ cursor: 'pointer' }} // Make the cursor behave like a link
+        style={{ cursor: 'pointer' }}
       >
         {link.label}
       </div>

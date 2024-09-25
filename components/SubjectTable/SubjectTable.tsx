@@ -3,7 +3,7 @@ import { Table, Loader, Text, Container, Title, Tooltip, Badge, Divider } from '
 import { AreaChart, LineChart, BarChart, DonutChart, PieChart } from '@mantine/charts';
 import React, { useEffect, useState, useCallback } from 'react';
 import { useSearchParams } from 'next/navigation';
-import parse, { domToReact } from 'html-react-parser'; // Import html-react-parser and domToReact
+import parse, { domToReact } from 'html-react-parser';
 import '@mantine/charts/styles.css';
 
 interface SubjectTableProps {
@@ -12,7 +12,7 @@ interface SubjectTableProps {
 
 // Define the data structure for each row
 interface CourseData {
-  term: string; // Changed from semester and year to term
+  term: string;
   section: string;
   instructorName: string;
   totalStudents: number;
@@ -103,7 +103,7 @@ export function SubjectTable({ selectedQuery }: SubjectTableProps) {
           const data = await response.json();
 
           const processedData: CourseData[] = data.map((item: any) => ({
-            term: `${item.Semester} ${item.Year}`, // Combine semester and year into term
+            term: `${item.Semester} ${item.Year}`,
             section: item.Section || 'N/A',
             instructorName: item.InstructorName || 'Unknown',
             totalStudents: item.TotalStudents || 0,
@@ -181,11 +181,9 @@ export function SubjectTable({ selectedQuery }: SubjectTableProps) {
   // Transform function to modify HTML elements
   const transform = (node: any) => {
     if (node.type === 'tag' && node.name === 'a') {
-      // Remove hyperlinks but keep the text
       return <span>{domToReact(node.children)}</span>;
     }
     if (node.type === 'tag' && node.name === 'span' && node.attribs.class === 'hours') {
-      // Add indentation after the first </span>
       return (
         <>
           {domToReact(node.children)}
@@ -195,7 +193,6 @@ export function SubjectTable({ selectedQuery }: SubjectTableProps) {
       );
     }
     if (node.type === 'tag' && node.name === 'strong' && node.parent && node.parent.name === 'p') {
-      // Add indentation before the second <strong>
       return (
         <>
           <br />
@@ -381,7 +378,7 @@ export function SubjectTable({ selectedQuery }: SubjectTableProps) {
             color: `var(--mantine-color-${['indigo', 'blue', 'teal', 'cyan', 'green', 'yellow', 'orange', 'red'][index % 8]}-6)`,
           }))}
           tickLine="y"
-          yAxisProps={{ domain: [0, 4] }} // Assuming GPA range is 0-4
+          yAxisProps={{ domain: [0, 4] }}
           withLegend
           orientation="horizontal"
           tooltipAnimationDuration={200}
@@ -416,7 +413,7 @@ export function SubjectTable({ selectedQuery }: SubjectTableProps) {
       >
         <Table.Thead>
           <Table.Tr>
-            <Table.Th>Term</Table.Th> {/* Change Semester and Year to Term */}
+            <Table.Th>Term</Table.Th>
             <Table.Th>Section</Table.Th>
             <Table.Th>Instructor</Table.Th>
             <Tooltip
@@ -488,7 +485,6 @@ export function SubjectTable({ selectedQuery }: SubjectTableProps) {
           </Table.Tr>
         </Table.Thead>
         <Table.Tbody>{rows}</Table.Tbody>
-        {/* <Table.Caption>Course performance data</Table.Caption> */}
       </Table>
     </Container>
   );
