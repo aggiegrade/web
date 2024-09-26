@@ -5,13 +5,15 @@ import React, { useEffect, useState, useCallback } from 'react';
 import { useSearchParams } from 'next/navigation';
 import parse, { domToReact } from 'html-react-parser';
 import '@mantine/charts/styles.css';
+import { DataTable, type DataTableSortStatus } from 'mantine-datatable';
+import sortBy from 'lodash/sortBy';
 
 interface SubjectTableProps {
   selectedQuery: string | null;
 }
 
 // Define the data structure for each row
-interface CourseData {
+interface CourseData extends Record<string, unknown>{
   term: string;
   section: string;
   instructorName: string;
@@ -43,7 +45,13 @@ export function SubjectTable({ selectedQuery }: SubjectTableProps) {
   const [loading, setLoading] = useState(true);
   const [courseChartData, setCourseChartData] = useState<any[]>([]);
   const [sectionInfos, setSectionInfos] = useState<SectionInfo[]>([]);
-  const [courseInfo, setCourseInfo] = useState<any>(null); // New state for course information
+  const [courseInfo, setCourseInfo] = useState<any>(null);
+  const [records, setRecords] = useState(courseData);
+
+  const [sortStatus, setSortStatus] = useState<DataTableSortStatus>({
+    columnAccessor: 'term',
+    direction: 'asc',
+  });
 
   // Memoize processChartData function
   const processChartData = useCallback((data: CourseData[]) => {
@@ -146,6 +154,12 @@ export function SubjectTable({ selectedQuery }: SubjectTableProps) {
       fetchCourseData();
     }
   }, [query, processChartData]);
+
+  useEffect(() => {
+    // Sort records based on sortStatus
+    const sortedRecords = sortBy(courseData, sortStatus.columnAccessor);
+    setRecords(sortStatus.direction === 'desc' ? sortedRecords.reverse() : sortedRecords);
+  }, [sortStatus, courseData]);
 
   // New useEffect to fetch course information
   useEffect(() => {
@@ -314,8 +328,6 @@ export function SubjectTable({ selectedQuery }: SubjectTableProps) {
       </React.Fragment>
     </Table.Tr>
   ));
-  
-  
 
   return (
     // Displaying Section Title
@@ -396,11 +408,11 @@ export function SubjectTable({ selectedQuery }: SubjectTableProps) {
           labelsPosition="outside"
           labelsType="percent"
           strokeWidth={1}
-          tooltipDataSource='segment'
+          tooltipDataSource="segment"
         />
       </div>
 
-      <Table
+      {/* <Table
         striped
         highlightOnHover
         withTableBorder
@@ -485,7 +497,36 @@ export function SubjectTable({ selectedQuery }: SubjectTableProps) {
           </Table.Tr>
         </Table.Thead>
         <Table.Tbody>{rows}</Table.Tbody>
-      </Table>
+      </Table> */}
+
+      <DataTable
+        columns={[
+          { accessor: 'term', title: 'Term', sortable: true },
+          { accessor: 'section', title: 'Section', sortable: true },
+          { accessor: 'instructorName', title: 'Instructor', sortable: true },
+          { accessor: 'totalStudents', title: '# Enrolled', sortable: true },
+          { accessor: 'a', title: 'A', sortable: true },
+          { accessor: 'b', title: 'B', sortable: true },
+          { accessor: 'c', title: 'C', sortable: true },
+          { accessor: 'd', title: 'D', sortable: true },
+          { accessor: 'f', title: 'F', sortable: true },
+          { accessor: 'droppedWithdrawn', title: 'Q' },
+          { accessor: 'incomplete', title: 'I', sortable: true },
+          { accessor: 'satisfactory', title: 'S', sortable: true },
+          { accessor: 'unsatisfactory', title: 'U', sortable: true },
+          { accessor: 'noGrade', title: 'X', sortable: true },
+          { accessor: 'averageGPA', title: 'Average GPA', sortable: true },
+        ]}
+        sortStatus={sortStatus}
+        onSortStatusChange={setSortStatus}
+        records={records}
+        striped
+        highlightOnHover
+        withTableBorder
+        withColumnBorders
+        borderRadius="sm"
+        verticalAlign="center"
+      />
     </Container>
   );
 }

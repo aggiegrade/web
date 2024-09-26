@@ -1,7 +1,10 @@
 import '@mantine/core/styles.css';
+import 'mantine-datatable/styles.css';
 import React from 'react';
 import { MantineProvider, ColorSchemeScript } from '@mantine/core';
 import { theme } from '../theme';
+
+import './layout.css';
 
 export const metadata = {
   title: 'AggieGrade',

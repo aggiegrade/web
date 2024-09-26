@@ -1,0 +1,7 @@
+@layer mantine {
+  @import '@mantine/core/styles.css';
+}
+
+@layer mantine-datatable {
+  @import 'mantine-datatable/styles.css';
+}

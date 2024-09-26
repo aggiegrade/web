@@ -106,9 +106,18 @@ export function HeaderSearch() {
   }, []);
 
   const drawerItems = links.map((link) => (
-    <Link href={link.link} key={link.label} className={classes.drawerLink}>
-      {link.label}
-    </Link>
+    link.label === 'Random'
+    ? <div 
+        key={link.label} 
+        className={classes.drawerLink} 
+        onClick={handleRandomSelection} 
+        style={{ cursor: 'pointer' }}
+      >
+        {link.label}
+      </div>
+    : <Link href={link.link} key={link.label} className={classes.drawerLink}>
+        {link.label}
+      </Link>
   ));
 
   return (

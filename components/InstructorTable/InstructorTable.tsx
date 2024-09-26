@@ -4,6 +4,8 @@ import { BarChart, DonutChart, PieChart } from '@mantine/charts';
 import { useEffect, useState, useCallback } from 'react';
 import { useSearchParams } from 'next/navigation';
 import '@mantine/charts/styles.css';
+import { DataTable, type DataTableSortStatus } from 'mantine-datatable';
+import sortBy from 'lodash/sortBy';
 
 interface InstructorTableProps {
   selectedInstructor: string | null;
@@ -37,6 +39,11 @@ export function InstructorTable({ selectedInstructor }: InstructorTableProps) {
   const [sectionsData, setSectionsData] = useState<InstructorSectionData[]>([]);
   const [loading, setLoading] = useState(true);
   const [instructorChartData, setInstructorChartData] = useState<any[]>([]);
+  const [sortStatus, setSortStatus] = useState<DataTableSortStatus>({
+    columnAccessor: 'term',
+    direction: 'asc',
+  });
+  const [sortedRows, setSortedRows] = useState<any[]>([]); // Added state for sortedRows
 
   const processChartData = useCallback((data: InstructorSectionData[]) => {
     const termCourseMap = new Map<string, Map<string, { totalGPA: number; count: number }>>();
@@ -74,6 +81,12 @@ export function InstructorTable({ selectedInstructor }: InstructorTableProps) {
       return chartItem;
     });
   }, []);
+
+  useEffect(() => {
+    // Sort records based on sortStatus
+    const sortedRecords = sortBy(sectionsData, sortStatus.columnAccessor); // Updated to use sectionsData
+    setSortedRows(sortStatus.direction === 'desc' ? sortedRecords.reverse() : sortedRecords); // Updated to set sortedRows
+  }, [sortStatus, sectionsData]); // Updated dependency to sectionsData
 
   useEffect(() => {
     if (instructorName) {
@@ -297,7 +310,7 @@ export function InstructorTable({ selectedInstructor }: InstructorTableProps) {
         />
       </div>
 
-      <Table
+      {/* <Table
         striped
         highlightOnHover
         withTableBorder
@@ -383,7 +396,55 @@ export function InstructorTable({ selectedInstructor }: InstructorTableProps) {
           </Table.Tr>
         </Table.Thead>
         <Table.Tbody>{rows}</Table.Tbody>
-      </Table>
+      </Table> */}
+
+<DataTable
+        columns={[
+          { accessor: 'term', title: 'Term', sortable: true },
+          { accessor: 'course', title: 'Course', sortable: true }, // Updated to show course
+          { accessor: 'section', title: 'Section', sortable: true },
+          { accessor: 'departmentName', title: 'Department', sortable: true }, // Updated to show department
+          { accessor: 'totalStudents', title: '# Enrolled', sortable: true },
+          { accessor: 'a', title: 'A', sortable: true },
+          { accessor: 'b', title: 'B', sortable: true },
+          { accessor: 'c', title: 'C', sortable: true },
+          { accessor: 'd', title: 'D', sortable: true },
+          { accessor: 'f', title: 'F', sortable: true },
+          { accessor: 'droppedWithdrawn', title: 'Q' },
+          { accessor: 'incomplete', title: 'I', sortable: true },
+          { accessor: 'satisfactory', title: 'S', sortable: true },
+          { accessor: 'unsatisfactory', title: 'U', sortable: true },
+          { accessor: 'noGrade', title: 'X', sortable: true },
+          { accessor: 'averageGPA', title: 'Average GPA', sortable: true },
+        ]}
+        records={sortedRows.map(item => ({ // Updated to use sortedRows
+          term: `${item.semester.toUpperCase()} ${item.year}`, // Combine semester and year
+          course: `${item.subject} ${item.course}`, // Combine subject and course
+          section: item.section,
+          departmentName: item.departmentName,
+          totalStudents: item.totalStudents,
+          a: item.a,
+          b: item.b,
+          c: item.c,
+          d: item.d,
+          f: item.f,
+          droppedWithdrawn: item.droppedWithdrawn,
+          incomplete: item.incomplete,
+          satisfactory: item.satisfactory,
+          unsatisfactory: item.unsatisfactory,
+          noGrade: item.noGrade,
+          averageGPA: item.averageGPA,
+        }))}
+        sortStatus={sortStatus}
+        onSortStatusChange={setSortStatus}
+        striped
+        highlightOnHover
+        withTableBorder
+        withColumnBorders
+        borderRadius="sm"
+        verticalAlign="center"
+      />
+
     </Container>
   );
 }
