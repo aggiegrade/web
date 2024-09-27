@@ -70,7 +70,7 @@ export function HeaderSearch() {
   useEffect(() => {
     const fetchInstructors = async () => {
       try {
-        const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/instructors`);
+        const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/instructors`);
         if (!response.ok) {
           throw new Error(`HTTP error! status: ${response.status}`);
         }
@@ -86,7 +86,7 @@ export function HeaderSearch() {
 
     const fetchSubjectAndCourses = async () => {
       try {
-        const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/subject-and-course`);
+        const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/subject-and-course`);
         if (!response.ok) {
           throw new Error(`HTTP error! status: ${response.status}`);
         }

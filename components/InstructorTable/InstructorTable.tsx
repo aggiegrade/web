@@ -93,7 +93,7 @@ export function InstructorTable({ selectedInstructor }: InstructorTableProps) {
       const fetchSectionsData = async () => {
         try {
           const response = await fetch(
-            `${process.env.NEXT_PUBLIC_API_BASE_URL}/instructor-sections?instructorName=${encodeURIComponent(
+            `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/instructor-sections?instructorName=${encodeURIComponent(
               instructorName
             )}`
           );

@@ -101,7 +101,7 @@ export function SubjectTable({ selectedQuery }: SubjectTableProps) {
       const fetchCourseData = async () => {
         try {
           const response = await fetch(
-            `${process.env.NEXT_PUBLIC_API_BASE_URL}/detailed-sections?search=${encodeURIComponent(
+            `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/detailed-sections?search=${encodeURIComponent(
               query
             )}`
           );
@@ -167,7 +167,7 @@ export function SubjectTable({ selectedQuery }: SubjectTableProps) {
       const fetchCourseInfo = async () => {
         try {
           const response = await fetch(
-            `${process.env.NEXT_PUBLIC_API_BASE_URL}/course-information`,
+            `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/course-information`,
             {
               method: 'POST',
               headers: {
